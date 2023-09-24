@@ -1,4 +1,0 @@
-[toolchain]
-# Keep synchronized with Dockerfile build-base
-channel = "1.72.1"
-components = ["clippy", "rust-analyzer", "rustfmt"]
