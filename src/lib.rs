@@ -1,7 +1,7 @@
 pub use backoff::{Backoff, Exponential, Linear};
 pub use error::Error;
-pub use synchronous::retry;
 
+pub mod asynchronous;
 mod backoff;
 mod error;
-mod synchronous;
+pub mod synchronous;
