@@ -1,5 +1,6 @@
 use crate::{Backoff, Error};
-use std::{future::Future, time::Duration};
+use cfg_if::cfg_if;
+use std::future::Future;
 
 #[cfg(all(not(feature = "async_std"), not(feature = "async_tokio")))]
 compile_error! {
@@ -18,24 +19,21 @@ where
             Err(cause) => {
                 tries += 1;
                 if let Some(delay) = backoff.next_delay() {
-                    sleep(delay).await
+                    cfg_if! {
+                        if #[cfg(feature = "async_tokio")] {
+                            tokio::time::sleep(delay).await;
+                        } else if #[cfg(feature = "async_std")] {
+                            async_std::task::sleep(delay).await;
+                        } else {
+                            // do something with the delay to prevent the compiler warning if no async runtime is specified
+                            drop(delay);
+                            unreachable!("there was an error in 'rotatory'");
+                        }
+                    }
                 } else {
                     return Err(Error { tries, cause });
                 }
             }
         }
-    }
-}
-
-#[inline]
-async fn sleep(duration: Duration) {
-    if cfg!(feature = "async_tokio") {
-        #[cfg(feature = "async_tokio")]
-        tokio::time::sleep(duration).await;
-    } else if cfg!(feature = "async_std") {
-        #[cfg(feature = "async_std")]
-        async_std::task::sleep(duration).await;
-    } else {
-        unreachable!()
     }
 }
