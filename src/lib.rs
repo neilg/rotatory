@@ -1,11 +1,27 @@
 pub use backoff::{Backoff, Exponential, Linear};
-use std::thread::sleep;
+use std::{
+    fmt::{Display, Formatter},
+    thread::sleep,
+};
 
 mod backoff;
 
+#[derive(Debug)]
 pub struct Error<E> {
+    tries: u32,
     cause: E,
 }
+
+impl<E> Display for Error<E>
+where
+    E: Display,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Tried {} times. Final error: {}", self.tries, self.cause)
+    }
+}
+
+impl<E> std::error::Error for Error<E> where E: std::error::Error {}
 
 impl<E> Error<E> {
     pub fn cause(&self) -> &E {
@@ -32,18 +48,20 @@ where
     F: FnMut() -> Result<T, E>,
 {
     fn run(&mut self) -> Result<T, Error<E>> {
+        let mut tries = 0;
         loop {
             let result = (self.body)();
             match result {
                 Ok(t) => {
                     return Ok(t);
                 }
-                Err(e) => {
+                Err(cause) => {
+                    tries += 1;
                     let delay = self.backoff.next_delay();
                     if let Some(delay) = delay {
                         sleep(delay);
                     } else {
-                        return Err(Error { cause: e });
+                        return Err(Error { tries, cause });
                     }
                 }
             }
