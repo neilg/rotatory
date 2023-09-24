@@ -17,7 +17,12 @@ where
                 tries += 1;
                 let delay = backoff.next_delay();
                 if let Some(delay) = delay {
+                    // TODO should we prevent both being called if both features are enabled?
+                    // TODO and how would we stop it?
+                    #[cfg(feature = "async_tokio")]
                     tokio::time::sleep(delay).await;
+                    #[cfg(feature = "async_std")]
+                    async_std::task::sleep(delay).await;
                 } else {
                     return Err(Error { tries, cause });
                 }
