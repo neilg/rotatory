@@ -1,5 +1,10 @@
 use crate::{Backoff, Error};
-use std::future::Future;
+use std::{future::Future, time::Duration};
+
+#[cfg(all(not(feature = "async_std"), not(feature = "async_tokio")))]
+compile_error! {
+    r#"feature "async_std" or feature "async_tokio" must be enabled"#
+}
 
 pub async fn retry<F, Fu, T, E>(mut backoff: impl Backoff, mut body: F) -> Result<T, Error<E>>
 where
@@ -8,25 +13,29 @@ where
 {
     let mut tries = 0;
     loop {
-        let result = body().await;
-        match result {
-            Ok(t) => {
-                return Ok(t);
-            }
+        match body().await {
+            Ok(t) => return Ok(t),
             Err(cause) => {
                 tries += 1;
-                let delay = backoff.next_delay();
-                if let Some(delay) = delay {
-                    // TODO should we prevent both being called if both features are enabled?
-                    // TODO and how would we stop it?
-                    #[cfg(feature = "async_tokio")]
-                    tokio::time::sleep(delay).await;
-                    #[cfg(feature = "async_std")]
-                    async_std::task::sleep(delay).await;
+                if let Some(delay) = backoff.next_delay() {
+                    sleep(delay).await
                 } else {
                     return Err(Error { tries, cause });
                 }
             }
         }
+    }
+}
+
+#[inline]
+async fn sleep(duration: Duration) {
+    if cfg!(feature = "async_tokio") {
+        #[cfg(feature = "async_tokio")]
+        tokio::time::sleep(duration).await;
+    } else if cfg!(feature = "async_std") {
+        #[cfg(feature = "async_std")]
+        async_std::task::sleep(duration).await;
+    } else {
+        unreachable!()
     }
 }

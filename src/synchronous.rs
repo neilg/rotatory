@@ -7,16 +7,14 @@ pub fn retry<T, E>(
 ) -> Result<T, Error<E>> {
     let mut tries = 0;
     loop {
-        let result = body();
-        match result {
+        match body() {
             Ok(t) => {
                 return Ok(t);
             }
             Err(cause) => {
                 tries += 1;
-                let delay = backoff.next_delay();
-                if let Some(delay) = delay {
-                    sleep(delay);
+                if let Some(delay) = backoff.next_delay() {
+                    sleep(delay)
                 } else {
                     return Err(Error { tries, cause });
                 }
