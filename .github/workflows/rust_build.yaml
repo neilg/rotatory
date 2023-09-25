@@ -3,6 +3,39 @@ on: [ push ]
 name: build
 
 jobs:
+  rust_build:
+    name: Rust build
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - nightly
+          - 1.72.1
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install ${{ matrix.rust }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          default: true
+          override: true
+          components: clippy
+
+      - name: Clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --all-targets -- -D warnings
+
+      - name: Tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all-targets
+
+
   check:
     name: Rust project
     runs-on: ubuntu-latest
