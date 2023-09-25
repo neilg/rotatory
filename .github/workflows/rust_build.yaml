@@ -11,6 +11,9 @@ jobs:
           - stable
           - nightly
           - 1.72.1
+        profile:
+          - dev
+          - release
         feature_async_std: [ "", "async_std" ]
         feature_async_tokio: [ "", "async_tokio" ]
         feature_sync: [ "", "sync" ]
@@ -30,14 +33,19 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features "${{ matrix.feature_async_std }},${{ matrix.feature_async_tokio }},${{ matrix.feature_sync }}," --all-targets -- -D warnings
+          args: --profile ${{ matrix.profile }} --features "${{ matrix.feature_async_std }},${{ matrix.feature_async_tokio }},${{ matrix.feature_sync }}," --all-targets -- -D warnings
 
       - name: Tests
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --features "${{ matrix.async_std }},${{ matrix.async_tokio }},${{ matrix.sync }}," --all-targets
+          args: --profile ${{ matrix.profile }} --features "${{ matrix.async_std }},${{ matrix.async_tokio }},${{ matrix.sync }}," --all-targets
 
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --profile ${{ matrix.profile }} --features "${{ matrix.async_std }},${{ matrix.async_tokio }},${{ matrix.sync }}," --all-targets
 
   check:
     name: Check formatting
