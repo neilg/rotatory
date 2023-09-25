@@ -11,6 +11,11 @@ jobs:
           - stable
           - nightly
           - 1.72.1
+        features:
+          - "async_std"
+          - "async_tokio"
+          - "async_std,async_tokio"
+          - "sync"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -27,13 +32,13 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --all-targets -- -D warnings
+          args: --features ${{ matrix.features }} --all-targets -- -D warnings
 
       - name: Tests
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --all-targets
+          args: --features ${{ matrix.features }} --all-targets
 
 
   check:
