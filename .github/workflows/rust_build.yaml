@@ -16,7 +16,7 @@ jobs:
         feature_sync: [ "", "sync" ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Install ${{ matrix.rust }}
         uses: actions-rs/toolchain@v1
@@ -43,7 +43,7 @@ jobs:
     name: Check formatting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Install nightly
         uses: actions-rs/toolchain@v1
         with:
