@@ -37,15 +37,15 @@ jobs:
 
 
   check:
-    name: Rust project
+    name: Check formatting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install latest nightly
+      - name: Install nightly
         uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
-          components: rustfmt, clippy
+          components: rustfmt
 
       - name: Format
         uses: actions-rs/cargo@v1
@@ -53,15 +53,3 @@ jobs:
           toolchain: nightly
           command: fmt
           args: --check
-
-      - name: Clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --all-targets -- -D warnings
-
-      - name: Tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all-targets
