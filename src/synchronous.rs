@@ -11,12 +11,12 @@ pub fn retry<T, E>(
             Ok(t) => {
                 return Ok(t);
             }
-            Err(cause) => {
+            Err(source) => {
                 tries += 1;
                 if let Some(delay) = backoff.next_delay() {
                     sleep(delay)
                 } else {
-                    return Err(Error { tries, cause });
+                    return Err(Error::new(tries, source));
                 }
             }
         }
@@ -28,14 +28,15 @@ mod tests {
     use super::*;
     use std::time::Duration;
 
-    struct AlwaysFailBackoff;
+    struct NeverRetry;
 
-    impl Backoff for AlwaysFailBackoff {
+    impl Backoff for NeverRetry {
         fn next_delay(&mut self) -> Option<Duration> {
-            panic!("always fails")
+            None
         }
     }
 
+    #[derive(Debug, Eq, PartialEq)]
     struct BadError;
 
     fn succeed() -> Result<i32, BadError> {
@@ -44,8 +45,8 @@ mod tests {
 
     #[test]
     fn should_return_result() {
-        let result = retry(AlwaysFailBackoff, succeed);
+        let result = retry(NeverRetry, succeed);
 
-        assert!(matches!(result, Ok(x) if x == 10));
+        assert_eq!(result, Ok(10));
     }
 }

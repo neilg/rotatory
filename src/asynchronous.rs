@@ -16,7 +16,7 @@ where
     loop {
         match body().await {
             Ok(t) => return Ok(t),
-            Err(cause) => {
+            Err(source) => {
                 tries += 1;
                 if let Some(delay) = backoff.next_delay() {
                     cfg_if! {
@@ -31,7 +31,7 @@ where
                         }
                     }
                 } else {
-                    return Err(Error { tries, cause });
+                    return Err(Error::new(tries, source));
                 }
             }
         }
