@@ -1,10 +1,9 @@
 #[cfg(feature = "sync")]
 mod tests {
     use rotatory::{backoff, backoff::Backoff};
-    use std::time::Instant;
     use std::{
         sync::{Arc, Mutex},
-        time::Duration,
+        time::{Duration, Instant},
     };
 
     struct FallibleService {
