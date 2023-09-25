@@ -1,7 +1,9 @@
 #[cfg(feature = "async_tokio")]
 mod tests {
-    use rotatory::{asynchronous, backoff, backoff::Backoff, Error};
+    use rotatory::{asynchronous, backoff, backoff::Backoff};
     use std::{
+        error::Error as _,
+        fmt::{Display, Formatter},
         sync::{Arc, Mutex},
         time::Duration,
     };
@@ -12,6 +14,27 @@ mod tests {
         call_count: Arc<Mutex<i32>>,
     }
 
+    #[derive(Debug, Eq, PartialEq)]
+    struct ServiceError {
+        message: String,
+    }
+
+    impl ServiceError {
+        fn new(message: impl ToString) -> Self {
+            Self {
+                message: message.to_string(),
+            }
+        }
+    }
+
+    impl Display for ServiceError {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            f.write_str(&self.message)
+        }
+    }
+
+    impl std::error::Error for ServiceError {}
+
     impl FallibleService {
         fn new() -> Self {
             Self {
@@ -19,10 +42,10 @@ mod tests {
             }
         }
 
-        async fn do_something(&mut self) -> Result<i32, String> {
+        async fn do_something(&mut self) -> Result<i32, ServiceError> {
             let mut call_count = self.call_count.lock().unwrap();
             *call_count += 1;
-            Err("Kaboom".to_string())
+            Err(ServiceError::new("Kaboom"))
         }
     }
 
@@ -48,9 +71,18 @@ mod tests {
             time_taken.as_millis()
         );
 
-        let Error { tries, cause } = result.unwrap_err();
+        let error = result.unwrap_err();
+        let error = error
+            .source()
+            .expect("there wasn't a source error")
+            .downcast_ref::<ServiceError>()
+            .expect("the source wasn't a ServiceError");
 
-        assert_eq!(cause, "Kaboom");
-        assert_eq!(tries, 10);
+        assert_eq!(
+            *error,
+            ServiceError {
+                message: "Kaboom".to_string()
+            }
+        );
     }
 }
