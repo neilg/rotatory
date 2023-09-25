@@ -26,3 +26,9 @@ jobs:
         with:
           command: clippy
           args: --all-targets -- -D warnings
+
+      - name: Tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all-targets
