@@ -1,4 +1,4 @@
-use crate::{Backoff, Error};
+use crate::{backoff::Backoff, Error};
 use std::thread::sleep;
 
 pub fn retry<T, E>(

@@ -1,4 +1,4 @@
-use crate::{Backoff, Error};
+use crate::{backoff::Backoff, Error};
 use cfg_if::cfg_if;
 use std::future::Future;
 

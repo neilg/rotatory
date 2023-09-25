@@ -2,6 +2,7 @@
 name = "rotatory"
 version = "0.1.0"
 edition = "2021"
+resolver = "2"
 
 [dependencies]
 
@@ -19,9 +20,12 @@ default-features = false
 features = ["time"]
 optional = true
 
+[dev-dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+#tokio-test = "0.4"
+
 [features]
 default = []
-#async = []
 async = ["dep:cfg-if"]
 sync = []
 async_tokio = ["async", "dep:tokio"]
