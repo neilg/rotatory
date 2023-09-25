@@ -11,11 +11,9 @@ jobs:
           - stable
           - nightly
           - 1.72.1
-        features:
-          - "async_std"
-          - "async_tokio"
-          - "async_std,async_tokio"
-          - "sync"
+        feature_async_std: [ "", "async_std" ]
+        feature_async_tokio: [ "", "async_tokio" ]
+        feature_sync: [ "", "sync" ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -32,13 +30,13 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features ${{ matrix.features }} --all-targets -- -D warnings
+          args: --features "${{ matrix.feature_async_std }},${{ matrix.feature_async_tokio }},${{ matrix.feature_sync }}," --all-targets -- -D warnings
 
       - name: Tests
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --features ${{ matrix.features }} --all-targets
+          args: --features "${{ matrix.async_std }},${{ matrix.async_tokio }},${{ matrix.sync }}," --all-targets
 
 
   check:
