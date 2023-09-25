@@ -18,6 +18,8 @@ jobs:
         feature_async_tokio: [ "", "async_tokio" ]
         feature_sync: [ "", "sync" ]
     runs-on: ubuntu-latest
+    env:
+      FEATURES: ${{ matrix.feature_async_std }},${{ matrix.feature_async_tokio }},${{ matrix.feature_sync }},
     steps:
       - uses: actions/checkout@v4
 
@@ -30,22 +32,13 @@ jobs:
           components: clippy
 
       - name: Clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --profile ${{ matrix.profile }} --features "${{ matrix.feature_async_std }},${{ matrix.feature_async_tokio }},${{ matrix.feature_sync }}," --all-targets -- -D warnings
+        run: cargo clippy --profile ${{ matrix.profile }} --features $FEATURES --all-targets -- -D warnings
 
       - name: Tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --profile ${{ matrix.profile }} --features "${{ matrix.async_std }},${{ matrix.async_tokio }},${{ matrix.sync }}," --all-targets
+        run: cargo test --profile ${{ matrix.profile }} --features $FEATURES --all-targets
 
       - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --profile ${{ matrix.profile }} --features "${{ matrix.async_std }},${{ matrix.async_tokio }},${{ matrix.sync }}," --all-targets
+        run: cargo build --profile ${{ matrix.profile }} --features $FEATURES --all-targets
 
   check:
     name: Check formatting
