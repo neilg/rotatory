@@ -59,7 +59,7 @@ mod tests {
             .with_max_attempts(10);
 
         let start_time = Instant::now();
-        let result = asynchronous::retry(backoff, || {
+        let result = asynchronous::retry(backoff, tokio::time::sleep, || {
             let mut service = service.clone();
             async move { service.do_something().await }
         })
