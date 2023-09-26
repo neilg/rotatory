@@ -1,22 +1,20 @@
-use crate::{backoff::Backoff, Error};
+use crate::backoff::Backoff;
 use std::thread::sleep;
 
 pub fn retry<T, E>(
     mut backoff: impl Backoff,
     mut body: impl FnMut() -> Result<T, E>,
-) -> Result<T, Error<E>> {
-    let mut tries = 0;
+) -> Result<T, E> {
     loop {
         match body() {
             Ok(t) => {
                 return Ok(t);
             }
-            Err(source) => {
-                tries += 1;
+            Err(e) => {
                 if let Some(delay) = backoff.next_delay() {
                     sleep(delay)
                 } else {
-                    return Err(Error::new(tries, source));
+                    return Err(e);
                 }
             }
         }

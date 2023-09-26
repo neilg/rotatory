@@ -1,8 +1,7 @@
-#[cfg(feature = "async_tokio")]
+#[cfg(feature = "async")]
 mod tests {
     use rotatory::{asynchronous, backoff, backoff::Backoff};
     use std::{
-        error::Error as _,
         fmt::{Display, Formatter},
         sync::{Arc, Mutex},
         time::Duration,
@@ -71,18 +70,11 @@ mod tests {
             time_taken.as_millis()
         );
 
-        let error = result.unwrap_err();
-        let error = error
-            .source()
-            .expect("there wasn't a source error")
-            .downcast_ref::<ServiceError>()
-            .expect("the source wasn't a ServiceError");
-
         assert_eq!(
-            *error,
-            ServiceError {
+            result,
+            Err(ServiceError {
                 message: "Kaboom".to_string()
-            }
+            })
         );
     }
 }
