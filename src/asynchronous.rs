@@ -23,3 +23,35 @@ where
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    struct NeverRetry;
+    impl Backoff for NeverRetry {
+        fn next_delay(&mut self) -> Option<Duration> {
+            None
+        }
+    }
+
+    async fn sleep(_: Duration) {}
+
+    #[tokio::test]
+    async fn should_return_result_on_ok() {
+        let fallible = || async { Ok::<_, String>(26) };
+
+        let result = retry(NeverRetry, sleep, fallible).await;
+
+        assert_eq!(result, Ok(26));
+    }
+
+    #[tokio::test]
+    async fn should_return_error_on_failure() {
+        let fallible = || async { Err::<i32, _>("oh dear".to_string()) };
+
+        let result = retry(NeverRetry, sleep, fallible).await;
+
+        assert_eq!(result, Err("oh dear".to_string()));
+    }
+}

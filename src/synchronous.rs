@@ -27,24 +27,27 @@ mod tests {
     use std::time::Duration;
 
     struct NeverRetry;
-
     impl Backoff for NeverRetry {
         fn next_delay(&mut self) -> Option<Duration> {
             None
         }
     }
 
-    #[derive(Debug, Eq, PartialEq)]
-    struct BadError;
+    #[test]
+    fn should_return_result_on_ok() {
+        let fallible = || Ok::<_, String>(10);
 
-    fn succeed() -> Result<i32, BadError> {
-        Ok(10)
+        let result = retry(NeverRetry, fallible);
+
+        assert_eq!(result, Ok(10));
     }
 
     #[test]
-    fn should_return_result() {
-        let result = retry(NeverRetry, succeed);
+    fn should_return_error_on_failure() {
+        let fallible = || Err::<i32, _>("failure".to_string());
 
-        assert_eq!(result, Ok(10));
+        let result = retry(NeverRetry, fallible);
+
+        assert_eq!(result, Err("failure".to_string()));
     }
 }
