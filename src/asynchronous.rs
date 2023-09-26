@@ -7,10 +7,12 @@ compile_error! {
     r#"feature "async_std" or feature "async_tokio" must be enabled"#
 }
 
-pub async fn retry<F, Fu, T, E>(mut backoff: impl Backoff, mut body: F) -> Result<T, Error<E>>
+pub async fn retry<R, T, E>(
+    mut backoff: impl Backoff,
+    mut body: impl FnMut() -> R,
+) -> Result<T, Error<E>>
 where
-    F: FnMut() -> Fu,
-    Fu: Future<Output = Result<T, E>>,
+    R: Future<Output = Result<T, E>>,
 {
     let mut tries = 0;
     loop {
