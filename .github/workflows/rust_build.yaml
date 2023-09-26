@@ -14,12 +14,11 @@ jobs:
         profile:
           - dev
           - release
-        feature_async_std: [ "", "async_std" ]
-        feature_async_tokio: [ "", "async_tokio" ]
+        feature_async: [ "", "async" ]
         feature_sync: [ "", "sync" ]
     runs-on: ubuntu-latest
     env:
-      FEATURES: ${{ matrix.feature_async_std }},${{ matrix.feature_async_tokio }},${{ matrix.feature_sync }},
+      FEATURES: ${{ matrix.feature_async }},${{ matrix.feature_sync }},
     steps:
       - uses: actions/checkout@v4
 
