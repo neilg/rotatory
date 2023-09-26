@@ -31,13 +31,13 @@ jobs:
           components: clippy
 
       - name: Clippy
-        run: cargo clippy --profile ${{ matrix.profile }} --features $FEATURES --all-targets -- -D warnings
+        run: cargo clippy --profile ${{ matrix.profile }} --no-default-features --features $FEATURES --all-targets -- -D warnings
 
       - name: Tests
-        run: cargo test --profile ${{ matrix.profile }} --features $FEATURES --all-targets
+        run: cargo test --profile ${{ matrix.profile }} --no-default-features --features $FEATURES --all-targets
 
       - name: Build
-        run: cargo build --profile ${{ matrix.profile }} --features $FEATURES --all-targets
+        run: cargo build --profile ${{ matrix.profile }} --no-default-features --features $FEATURES --all-targets
 
   check:
     name: Check formatting
