@@ -1,11 +1,6 @@
 use crate::{backoff::Backoff, Error};
 use std::{future::Future, time::Duration};
 
-#[cfg(all(not(feature = "async_std"), not(feature = "async_tokio")))]
-compile_error! {
-    r#"feature "async_std" or feature "async_tokio" must be enabled"#
-}
-
 pub async fn retry<R, S, T, E>(
     mut backoff: impl Backoff,
     sleep: impl Fn(Duration) -> S,
