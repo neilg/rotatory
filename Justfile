@@ -3,6 +3,8 @@
 set dotenv-load := true
 
 profile := env_var_or_default("PROFILE", "dev")
+features := env_var_or_default("FEATURES", "")
+feature_args := if features == "" { "" } else { "--no-default-features --features " + features } 
 
 default:
     @just --list
@@ -12,13 +14,13 @@ clean:
 
 # Build library
 build:
-    cargo build --profile={{ profile }} --all-targets
+    cargo build --profile={{ profile }} --all-targets {{ feature_args }}
 
 test:
-    cargo test --profile={{ profile }} --all-targets
+    cargo test --profile={{ profile }} --all-targets {{ feature_args }}
 
 lint:
-    cargo clippy --profile={{ profile }} --all-targets -- -D warnings
+    cargo clippy --profile={{ profile }} --all-targets {{ feature_args }} -- -D warnings
 
 # Check for known vulnerabilities in dependencies
 audit:

@@ -22,6 +22,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install just
+        run: curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to "$HOME/.local/bin"
+
       - name: Install ${{ matrix.rust }}
         uses: actions-rs/toolchain@v1
         with:
@@ -30,16 +33,16 @@ jobs:
           override: true
           components: clippy
 
-      - name: Clippy
-        run: cargo clippy --profile ${{ matrix.profile }} --no-default-features --features $FEATURES --all-targets -- -D warnings
+      - name: Lint
+        run: just lint
 
-      - name: Tests
-        run: cargo test --profile ${{ matrix.profile }} --no-default-features --features $FEATURES --all-targets
+      - name: Test
+        run: just test
 
       - name: Build
-        run: cargo build --profile ${{ matrix.profile }} --no-default-features --features $FEATURES --all-targets
+        run: just build
 
-  check:
+  check_format:
     name: Check formatting
     runs-on: ubuntu-latest
     steps:
@@ -50,9 +53,5 @@ jobs:
           toolchain: nightly
           components: rustfmt
 
-      - name: Format
-        uses: actions-rs/cargo@v1
-        with:
-          toolchain: nightly
-          command: fmt
-          args: --check
+      - name: Check formatting
+        run: cargo +nightly fmt --check --all
