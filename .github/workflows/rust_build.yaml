@@ -20,7 +20,7 @@ jobs:
     env:
       FEATURES: ${{ matrix.feature_async }},${{ matrix.feature_sync }},
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install just
         run: curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to "$HOME/.local/bin"
@@ -46,7 +46,7 @@ jobs:
     name: Check formatting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install nightly
         uses: actions-rs/toolchain@v1
         with:
